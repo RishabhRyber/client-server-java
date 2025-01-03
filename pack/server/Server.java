@@ -12,28 +12,36 @@ import pack.server.util.ClientHandler;
 import pack.server.util.ServerProperties;
 
 public class Server {
-    public static void main(String[] args) {
-    ServerSocket serverSocket = null;
-
+    private static ServerProperties getServerProperties(String[] args){
         if(args.length != 1){
             for (String string : args) {
                     System.out.println(string);
             }
             System.out.println("Incorrect Parameters passed: Please use: java client {config_dir}");
-            return;
+            throw new IllegalArgumentException("Incorrect Parameters passed: Please use: java client {config_dir}");
         }
         String configDirStr = args[0];
         File configFile = new File(configDirStr);
         if(!(configFile.exists() && configFile.isFile())){
             System.out.println("Config File not found at :".concat(configDirStr));
-            return;
+            throw new IllegalArgumentException("Config File not found at :".concat(configDirStr));
         }
         Properties properties = new Properties();
-        try {
-            InputStream input = new FileInputStream(configFile);
+        try (InputStream input = new FileInputStream(configFile)) {
             properties.load(input);
-        
-            ServerProperties serverProperties = new ServerProperties(properties);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            throw new IllegalArgumentException("Error reading config file");
+        }
+        ServerProperties serverProperties = new ServerProperties(properties);
+        return serverProperties;
+
+    }
+    public static void main(String[] args) {
+    ServerSocket serverSocket = null;
+
+        ServerProperties serverProperties = getServerProperties(args);
+        try {
             serverSocket = new ServerSocket(serverProperties.getServerPort());
             serverSocket.setReuseAddress(true);
             System.out.println("Server waiting on port: ".concat(serverProperties.getServerPort().toString()));

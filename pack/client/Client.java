@@ -11,7 +11,6 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import pack.client.util.ClientProperties;
@@ -30,9 +29,7 @@ public class Client {
             System.out.println("File Name: " + fileName);
             System.out.println("File Content: " + fileContent);
             serverOutStream.writeUTF(fileName);
-            serverOutStream.writeUTF("\n");
             serverOutStream.writeUTF(fileContent);
-            serverOutStream.writeUTF("\n");
             serverOutStream.flush();
             serverOutStream.close();
             socket.close();
@@ -79,7 +76,7 @@ public class Client {
         while (true) {
             
             File[] files = monitoredDir.listFiles();
-            if(files!=null){
+            if(files!=null && files.length>0){
                 for(File file: files){
                     Map<String, String> fileContentMap = new HashMap<>();
                     try {
@@ -109,6 +106,8 @@ public class Client {
                         continue;
                     }
                 }
+            }else{
+                System.out.println("No files to process");
             }
             try {
                 System.out.println("Sleeping for : " + clientProperties.getFileScanInterval());

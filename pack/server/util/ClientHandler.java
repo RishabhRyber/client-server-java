@@ -1,7 +1,7 @@
 package pack.server.util;
 
-import java.io.BufferedInputStream;
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -21,12 +21,16 @@ public void run() {
         String temp = "";
         String fileName = "";
         try {
-            dataInputStream = new DataInputStream(new BufferedInputStream(clientSocket.getInputStream()));
+            dataInputStream = new DataInputStream(clientSocket.getInputStream());
             fileName = dataInputStream.readUTF();
-            while ((temp = dataInputStream.readLine())!=null) {
-                if(temp.trim().isEmpty())
-                    continue;
-                line = line.concat(temp.trim()+"\n");
+            try{
+                while ((temp = dataInputStream.readUTF())!=null) {
+                    if(temp.trim().isEmpty())
+                        continue;
+                    line = line.concat(temp.trim());
+                }
+            } catch (EOFException e) {
+                System.out.println("EOF reached");
             }
             writeToFiles(serverProperties.getTargetDir(), fileName, line);
             if(dataInputStream != null) {
