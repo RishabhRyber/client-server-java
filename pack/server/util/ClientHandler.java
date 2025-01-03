@@ -44,10 +44,11 @@ public void run() {
             if(file.createNewFile()){
                 System.out.println("File created: ".concat(file.getName()));
             } else {
-                System.out.println("File already exists");
+                System.out.println("File already exists. Skipping writing to file");
                 return ;
             }
         } catch (IOException e) {
+            System.out.println("Error creating file");
             e.printStackTrace();
         }        
         System.out.println("Writing to files");
